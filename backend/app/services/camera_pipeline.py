@@ -257,7 +257,7 @@ class CameraPipeline:
                 confidence=next((d.confidence for d in detections
                                  if d.class_name == class_name and tuple(d.bbox) == tuple(bbox)), 0.0),
                 track_id=track_id,
-                bbox={"x1": bbox[0], "y1": bbox[1], "x2": bbox[2], "y3": bbox[3]},
+                bbox={"x1": bbox[0], "y1": bbox[1], "x2": bbox[2], "y2": bbox[3]},
             ))
 
         # 3) Behavior analytics
