@@ -1,0 +1,74 @@
+# ===== Environment & Secrets =====
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ===== Node =====
+node_modules/
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+npm-debug.log*
+yarn-error.log*
+
+# ===== Model weights (large, re-downloadable) =====
+models/*
+!models/.gitkeep
+*.pt
+*.onnx
+*.engine
+*.tflite
+
+# ===== Storage: recordings/snapshots/plates/faces (never commit) =====
+storage/snapshots/*
+storage/recordings/*
+storage/plates/*
+storage/faces/*
+!storage/**/.gitkeep
+backend/storage/snapshots/*
+backend/storage/recordings/*
+backend/storage/plates/*
+backend/storage/faces/*
+backend/storage/**/.gitkeep
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.jpg
+*.jpeg
+*.png
+!**/.gitkeep
+models/*.pt
+models/*.onnx
+*.webm
+
+# ===== IDE / OS =====
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# ===== Logs =====
+*.log
+logs/
