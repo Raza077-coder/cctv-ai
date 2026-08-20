@@ -1,0 +1,1 @@
+"""CCTV AI backend package."""
