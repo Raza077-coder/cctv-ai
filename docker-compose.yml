@@ -1,0 +1,83 @@
+# ===== CCTV AI — Docker Compose =====
+# Services: frontend, backend, postgres, redis (+ optional worker placeholder)
+# GPU: set COMPOSE_GPU=1 and install nvidia-container-toolkit to use CUDA inference.
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: cctv
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-CCTV_secret_change_me}
+      POSTGRES_DB: cctv_ai
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cctv"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg2://cctv:${POSTGRES_PASSWORD:-CCTV_secret_change_me}@postgres:5432/cctv_ai
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY:-change_me_generate_a_random_hex_string}
+      YOLO_MODEL: ${YOLO_MODEL:-yolov8n.pt}
+      DETECTION_CONFIDENCE: ${DETECTION_CONFIDENCE:-0.35}
+      PROCESS_FPS: ${PROCESS_FPS:-15}
+      ENABLE_ANPR: ${ENABLE_ANPR:-true}
+      ENABLE_FACE_RECOGNITION: ${ENABLE_FACE_RECOGNITION:-false}
+      ENABLE_MOTION_DETECTION: ${ENABLE_MOTION_DETECTION:-true}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8080}
+      STORAGE_ROOT: /app/storage
+    volumes:
+      - storage:/app/storage
+      - models:/app/models
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    # Optional GPU support:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redisdata:
+  storage:
+  models:
